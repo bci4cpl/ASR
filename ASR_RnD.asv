@@ -1,0 +1,29 @@
+clear; clc; close all
+
+load eeg.mat; % eeg
+Fs = 256;
+dt = 1/Fs;
+
+%%
+Ch1 = eeg(1,1:10000);
+t = (1:length(Ch1))*dt;
+plot(t,Ch1)
+
+% Define Baseline period without artifacts
+
+%% 1. create Xc: caibration data
+%1 split into 1 sec windows (pseudo epoching)
+win_n = size(eeg)/ Fs; % have to 
+epdata = reshape(eeg, [channels, wnd_size, wnd_n]);
+
+%2 calculate RMS for each channel in each window
+
+%3 calculate z
+
+%4 reject windows with -3.5<z<5.5
+
+%5 concatenate the other windows
+
+%% 2. rejection creiteria on a PC space
+
+%1 covarience matrix of Xc
