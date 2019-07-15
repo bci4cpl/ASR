@@ -22,10 +22,12 @@ epdata = rms(epdata,2);
 %3 calculate z-scorr for each channel
 zepdata = zscore(epdata);
 
-%4 reject windows with Z>5.5 or Z<-3.5
-wnd_reject = zepdata > 5.5 || zepdata < -3.5;
+%4 reject windows with either channel Z>5.5 or Z<-3.5
+wnd_reject = sum(zepdata > 5.5 || zepdata < -3.5);
+epdata_c = epdata(:,:,wnd_reject ~= 1);
 
 %5 concatenate the other windows
+Xc = squeeze(epdata_c);
 
 %% 2. rejection creiteria on a PC space
 clear;clc
