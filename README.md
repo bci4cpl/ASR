@@ -16,6 +16,7 @@ The implemented algorithm takes 3 parts:
 
 # Prerequisits
 Written in matlab 2019a, 2018a. other versions not checked
+
 optional EEGLAB in the matlab path for some intermediate visualizations
 
 # Refferences
