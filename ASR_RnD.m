@@ -6,29 +6,31 @@ dt = 1/Fs;
 % N_ch - number of EEG channels
 
 %%
-Ch1 = eeg(1,1:10000);
+Ch1 = eeg(2,1:10000);
 t = (1:length(Ch1))*dt;
 plot(t,Ch1)
 
+eeg_clean_ch = eeg(2:20,:);
 % Define Baseline period without artifacts
 
 %% 1. create Xc: caibration data (a matrix of N_ch-by-N_tc, N_tc = Number of clean 1-sec time windows times Fs)
 %1 split into 1 sec windows (pseudo epoching)
-epdata = epoch_data(eeg, 1000, Fs);
+epdata = epoch_data(eeg_clean_ch, 1000, Fs);
+eegplot_CPL(epdata, 'srate',Fs);
 
 %2 calculate RMS for each channel in each window
-epdata = rms(epdata,2);
+data_rms = rms(epdata,2);
 
 %3 calculate z-scorr for each channel
-zepdata = zscore(epdata);
+zepdata = zscore(data_rms);
 
 %4 reject windows with either channel Z>5.5 or Z<-3.5
-wnd_reject = sum(zepdata > 5.5 || zepdata < -3.5);
+wnd_reject = sum(zepdata > 5.5 | zepdata < -3.5);
 epdata_c = epdata(:,:,wnd_reject ~= 1);
+eegplot_CPL(epdata_c, 'srate',Fs);
 
 %5 concatenate the other windows
-Xc = squeeze(epdata_c);
-
+Xc = reshape(epdata_c,size(eeg_clean_ch,1),[]);
 %% 2. rejection creiteria on a PC space
 clear;clc
 Fs = 30;
