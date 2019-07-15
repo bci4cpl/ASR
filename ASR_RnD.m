@@ -14,12 +14,10 @@ plot(t,Ch1)
 
 %% 1. create Xc: caibration data (a matrix of N_ch-by-N_tc, N_tc = Number of clean 1-sec time windows times Fs)
 %1 split into 1 sec windows (pseudo epoching)
-wnd_size = 1 * Fs; % secnonds * Fs 
-win_n = size(eeg)/ wnd_size; % TODO: have to trim from eeg the mod of the deviation
-epdata = reshape(eeg, [channels, wnd_size, wnd_n]);
+epdata = epoch_data(eeg, 1000, Fs);
 
 %2 calculate RMS for each channel in each window
-epdata = RMS(epdata);
+epdata = rms(epdata,2);
 
 %3 calculate z-scorr for each channel
 zepdata = zscore(epdata);
@@ -54,13 +52,13 @@ Dc = Dxc_sqrt;
 Yc = transpose(Vc)*Xc;
 
 % Divide Yc into 0.5-sec windows
-N_win = round(Fs/2); % number of samples in each 0.5-sec window
-Num_of_Windows = floor(size(Yc,2)/N_win);
-N_ch = size(Yc,1);
-Yc_epoched = reshape(Yc(:,1:Num_of_Windows*N_win),N_ch,N_win,Num_of_Windows);
+% N_win = round(Fs/2); % number of samples in each 0.5-sec window
+% Num_of_Windows = floor(size(Yc,2)/N_win);
+% N_ch = size(Yc,1);
+Yc_epoched = epoch_data(Yc, 500, Fs); % reshape(Yc(:,1:Num_of_Windows*N_win),N_ch,N_win,Num_of_Windows);
 
 % Find mean and std of each 0.5-sec window
-Yc_epoched_RMS = RMS(Yc_epoched);
+Yc_epoched_RMS = rms(Yc_epoched,2);
 %Yc_epoched_RMS = squeeze(Yc_epoched_RMS);
 Yc_mean = mean(Yc_epoched');
 Yc_std = std(Yc_epoched');
