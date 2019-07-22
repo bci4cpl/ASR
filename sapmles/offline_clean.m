@@ -1,7 +1,5 @@
 % clear all;clc;
 %%
-cut_off_arr = [0 5 10 20 50 100];
-
 eeglab nogui
 EEG = pop_importdata('dataformat','array','nbchan',0,'data','raw','srate',512,'pnts',0,'xmin',0);
 EEG = pop_select( EEG,'nochannel',1); % remove the first time channel
