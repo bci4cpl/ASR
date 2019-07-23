@@ -1,5 +1,7 @@
 % clear all;clc;
 %%
+cut_off_arr = [0 5 10 20 50 100]; % change this variable to the desired cutoff values.
+
 eeglab nogui
 EEG = pop_importdata('dataformat','array','nbchan',0,'data','raw','srate',512,'pnts',0,'xmin',0);
 EEG = pop_select( EEG,'nochannel',1); % remove the first time channel
@@ -12,11 +14,11 @@ load('gTec_Chanlocs.mat')
 EEG_ASR_C = {};
 
 EEG_C = clean_flatlines(EEG);
-if isempty(EEG.chanlocs)== 0
-    EEG_C = clean_channels(EEG_C);
-else
+% if isempty(EEG.chanlocs)== 0
+%     EEG_C = clean_channels(EEG_C);
+% else
     EEG_C = clean_channels_nolocs(EEG_C);
-end
+% end
 EEG_C = clean_drifts(EEG_C);
 
 EEG_ASR_C{1}.cutoff = 0;
