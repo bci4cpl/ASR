@@ -16,7 +16,7 @@
 % some general plot parameters
 chan_select = 1:10;
 color_spec = parula(10);
-buff_length = 10240; % smplaes. for seconds buff_length/srate
+buff_length = 5120; % smplaes. for seconds buff_length/srate
 plot_scale = 50;
 
 % asr specific parameters
@@ -45,6 +45,7 @@ disp('Now receiving chunked data...');
 % some contineous plotting initializations.
 figure (1)
 plot_buff = zeros(EEG.nbchan,buff_length);
+plot_time_bff = zeros(buff_length,1);
 plot(plot_buff');
 xlim([0 buff_length]);
 plot_color_raw = color_spec(5,:);
@@ -59,6 +60,7 @@ asr_plot_buff = ones(EEG.nbchan,buff_length);
 plot_color_asr = color_spec(7,:);
 
 
+
 while true
     % get chunk from the inlet
     [chunk,stamps] = inlet.pull_chunk();
@@ -68,7 +70,12 @@ while true
         % remove excess channels from data. In this vesrion it is
         % hypothesized theat the first channel is the time channel and
         % therefore removed. TODO: remove previeusly marked bad channels.
-        data_ = chunk(2:end,:);
+        data_ = chunk;
+        
+        % cycle the time buff
+        plot_time_bff = circshift(plot_time_bff, -sz);
+        insr_in_ = buff_length - sz + 1;
+        plot_time_bff(insr_in_:end) = stamps/10000;
         
         % cycle a buffer with the new sample to create the sample window
         % that will be fed to the ASR.
@@ -94,8 +101,9 @@ while true
         plot_buff(:,insr_in_:end) = asr_buff;
         
         % plotting the data into a moving plot.
-        leadplot(plot_buff(chan_select,:), asr_plot_buff(chan_select,:), plot_scale, plot_color_raw, plot_color_asr, .5, .08, .1);
-        xlim([0 buff_length]);
+        t = linspace(1, buff_length/EEG.srate ,size(asr_plot_buff,2));
+        leadplot(plot_buff(chan_select,:), asr_plot_buff(chan_select,:),t, plot_scale, plot_color_raw, plot_color_asr, .5, .08, .1);
+%         xlim([0 buff_length]);
         ylim([-(plot_scale + 5) 5]);
         
         pause(0.05);
