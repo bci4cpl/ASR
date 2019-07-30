@@ -1,2 +1,4 @@
 *.asv
 *.bdf
+liblsl-Matlab
+liblsl-Matlab/*
