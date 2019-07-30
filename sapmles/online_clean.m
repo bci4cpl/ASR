@@ -59,53 +59,59 @@ asr_buff = zeros(EEG.nbchan, stepsize);
 asr_plot_buff = ones(EEG.nbchan,buff_length);
 plot_color_asr = color_spec(7,:);
 
-
-
 while true
+    emit_asr_buff = 0;
+    while emit_asr_buff < stepsize
     % get chunk from the inlet
+     tic;
     [chunk,stamps] = inlet.pull_chunk();
+     tm = toc * 1000;
+
     sz = size(stamps,2);
-    if sz > 0
+        if sz > 0
         
-        % remove excess channels from data. In this vesrion it is
-        % hypothesized theat the first channel is the time channel and
-        % therefore removed. TODO: remove previeusly marked bad channels.
-        data_ = chunk;
-        
-        % cycle the time buff
-        plot_time_bff = circshift(plot_time_bff, -sz);
-        insr_in_ = buff_length - sz + 1;
-        plot_time_bff(insr_in_:end) = stamps/10000;
-        
-        % cycle a buffer with the new sample to create the sample window
-        % that will be fed to the ASR.
-        asr_buff = circshift(asr_buff, -sz,2);
-        insr_in_ = stepsize - sz + 1;
-        asr_buff(:,insr_in_:end) = data_;
-        
-        
-        % do the actual ASAR analysis
-        [signal.data,state] = asr_process(asr_buff, EEG.srate,state,windowlen,windowlen/2,stepsize,maxdims,[],usegpu);
-        % shift signal content back (to compensate for processing delay)
-%         signal.data(:,1:size(state.carry,2)) = [];
-    
-        % asr plotting preperations.
-        sa_asr = size(signal.data,2);
-        asr_plot_buff = circshift(asr_plot_buff, -sa_asr,2);
-        insr_in_ = buff_length - sa_asr + 1 ;
-        asr_plot_buff(:,insr_in_:end) = signal.data;
-        
-        % original data plotting preperations
-        plot_buff = circshift(plot_buff, -sa_asr,2);
-        insr_in_ = buff_length - sa_asr + 1;
-        plot_buff(:,insr_in_:end) = asr_buff;
-        
-        % plotting the data into a moving plot.
-        t = linspace(1, buff_length/EEG.srate ,size(asr_plot_buff,2));
-        leadplot(plot_buff(chan_select,:), asr_plot_buff(chan_select,:),t, plot_scale, plot_color_raw, plot_color_asr, .5, .08, .1);
-%         xlim([0 buff_length]);
-        ylim([-(plot_scale + 5) 5]);
-        
-        pause(0.05);
+            % remove excess channels from data. In this vesrion it is
+            % hypothesized theat the first channel is the time channel and
+            % therefore removed. TODO: remove previeusly marked bad channels.
+            data_ = chunk;
+
+            % cycle the time buff
+            plot_time_bff = circshift(plot_time_bff, -sz);
+            insr_in_ = buff_length - sz + 1;
+            plot_time_bff(insr_in_:end) = stamps/10000;
+
+            % cycle a buffer with the new sample to create the sample window
+            % that will be fed to the ASR.
+            asr_buff = circshift(asr_buff, -sz,2);
+            insr_in_ = stepsize - sz + 1;
+            asr_buff(:,insr_in_:end) = data_;
+
+            emit_asr_buff = emit_asr_buff + sz;
+        end
     end
+    fprintf(['buffer: ' num2str(emit_asr_buff) ':: time: ' num2str(tm) '\n']);
+    % do the actual ASAR analysis
+    [signal.data,state] = asr_process(asr_buff, EEG.srate,state,windowlen,windowlen/2,stepsize,maxdims,[],usegpu);
+    % shift signal content back (to compensate for processing delay)
+%         signal.data(:,1:size(state.carry,2)) = [];
+
+    % asr plotting preperations.
+    sa_asr = size(signal.data,2);
+    asr_plot_buff = circshift(asr_plot_buff, -sa_asr,2);
+    insr_in_ = buff_length - sa_asr + 1 ;
+    asr_plot_buff(:,insr_in_:end) = signal.data;
+
+    % original data plotting preperations
+    plot_buff = circshift(plot_buff, -sa_asr,2);
+    insr_in_ = buff_length - sa_asr + 1;
+    plot_buff(:,insr_in_:end) = asr_buff;
+
+    % plotting the data into a moving plot.
+    t = linspace(1, buff_length/EEG.srate ,size(asr_plot_buff,2));
+    leadplot(plot_buff(chan_select,:), asr_plot_buff(chan_select,:),t, plot_scale, plot_color_raw, plot_color_asr, .5, .08, .1);
+%         xlim([0 buff_length]);
+    ylim([-(plot_scale + 5) 5]);
+
+    pause(0.05);
+
 end
