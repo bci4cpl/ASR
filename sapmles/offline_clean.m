@@ -26,7 +26,7 @@ EEG_ASR_C{1}.data =EEG_C;
 c = parula(size(cut_off_arr,2));
 for cutoffinx = 2:size(cut_off_arr,2)
     fprintf(['ASR clean with cutoff:\t' num2str(cut_off_arr(cutoffinx)) '\t***********\n\n']);
-    EEG_ASR_C{cutoffinx}.cutoff = CUTOFF;
+    EEG_ASR_C{cutoffinx}.cutoff = cut_off_arr(cutoffinx);
     EEG_ASR_C{cutoffinx}.data = clean_asr(EEG_C,cut_off_arr(cutoffinx));
     vis_artifacts(EEG_ASR_C{cutoffinx}.data,EEG_ASR_C{1}.data,'OldColor',c(cutoffinx,:));
 end
